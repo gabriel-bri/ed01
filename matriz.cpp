@@ -23,6 +23,19 @@ Matriz::Matriz(int linhas, int colunas) {
         aux = head_Col;
     }
     aux->direita = head;
+}
+
+int Matriz::getTamLinhas() {
+    return Ltam;
+}
+
+int Matriz::getTamCols() {
+    return Ctam;
+}
+
+Node* Matriz::getHead() {
+    return head;
+}
 
 Matriz::~Matriz() {
     std::cout << "apagou";
