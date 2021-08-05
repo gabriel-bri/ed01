@@ -25,11 +25,11 @@ private:
     int Ctam;
 public:
     //Inicializa uma matriz esparsa vazia com capacidade para m linhas e n colunas.
-    Matriz(int,int);
+    Matriz(int m,int n);
     //Destrutor que libera toda a memória que foi alocada dinamicamente para esta estrutura de dados.
     ~Matriz();
     //Insere um valor na célula (i, j) da matriz, onde i é alinha e j é a coluna.
-    void insert(int,int,double);
+    void insert(int i,int j,double valor);
     //Devolve o valor na célula (i, j) da matriz, onde i é a linha e j é a coluna.
     double getValue(int,int);
     //Devolve a quantidade de linhas da matriz
@@ -42,7 +42,7 @@ public:
     void print();
 };
 //Se possível somar, retorna uma terceira matriz com o resultado da soma de duas matrizes
-Matriz *soma (Matriz*, Matriz*);
+Matriz *soma (Matriz* A, Matriz* B);
 //Se possível multiplicar, retorna uma terceira matriz com o resultado da multiplicação de duas matrizes
 Matriz *multiplica(Matriz*, Matriz*);
 //Dado o nome de um arquivo, lê uma matriz desse arquivo
