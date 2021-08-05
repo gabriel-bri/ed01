@@ -48,7 +48,11 @@ using namespace std;
         }
         delete head;
     }
-
+    
+    bool Matriz::naMatriz(int i, int j) {
+        return i <= Ltam && i >= 1 && j <= Ctam && j >= 1;
+    }
+    
     void Matriz::insert(int i, int j, double value) {
         if(i > Ltam || i < 1 || j > Ctam || j < 1) //impossível inserir fora da matriz
             return;
