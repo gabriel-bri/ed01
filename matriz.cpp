@@ -5,7 +5,7 @@ using namespace std;
     Matriz::Matriz(int linhas, int colunas) {
         Ltam = linhas;
         Ctam = colunas;
-        head = new Node(-1, -1, 0, nullptr, nullptr);
+        head = new Node(-1, -1, 0, nullptr, nullptr); // head da matriz
         head->abaixo = head;
         head->direita = head;
 
@@ -16,7 +16,7 @@ using namespace std;
             aux->abaixo = head_Line;
             aux = head_Line;
         }
-        aux->abaixo = head;
+        aux->abaixo = head; // circular
         aux = head;
         for(int j = 1; j <= colunas; j++) { //Cria todos os "heads" de cada coluna
             Node *head_Col = new Node(-1, j, 0, nullptr, nullptr);
@@ -24,7 +24,7 @@ using namespace std;
             aux->direita = head_Col;
             aux = head_Col;
         }
-        aux->direita = head;
+        aux->direita = head; // circular
     }
     
     Matriz::~Matriz() {
@@ -32,56 +32,63 @@ using namespace std;
         Node *it_elems;
         for(int j = 0; j < Ctam; j++) { //deleta as colunas e os elementos armazenados na matriz
             it_elems = it_heads->abaixo;
-            while(it_elems != it_heads) {
+            while(it_elems != it_heads) { // percorre a coluna deletando as células até retornar ao head da coluna
                 Node *aux = it_elems;
                 it_elems = it_elems->abaixo;
                 delete aux;
             }
             it_heads = it_heads->direita;
-            delete it_elems;
+            delete it_elems; // deleta o head da coluna
         }
         it_heads = head->abaixo;
-        for(int i = 0; i < Ltam; i++) { //deleta as linhas
+        for(int i = 0; i < Ltam; i++) { //deleta os heads das linhas
             it_elems = it_heads;
             it_heads = it_heads->abaixo;
             delete it_elems;
         }
+        delete head;
     }
 
     void Matriz::insert(int i, int j, double value) {
-        //impossível inserir fora da matriz
-        if(i > Ltam || j > Ctam)
+        if(i > Ltam || i < 1 || j > Ctam || j < 1) //impossível inserir fora da matriz
             return;
-        //cria o novo nó e insere ele na coluna correta
-        Node *aux = head->direita;
-        while(aux->coluna != j)
+        
+        Node *aux = head->direita; 
+        while(aux->coluna != j) // percorre as colunas até achar a correta
             aux = aux->direita;
-        //cout << "morreu";
         Node *it = aux;
-        while(it->abaixo->linha != -1 && it->abaixo->linha < i)
+        while(it->abaixo->linha != -1 && it->abaixo->linha < i) // percorre a coluna até achar o local correto de inserção
             it = it->abaixo;
-        Node *novo = new Node(i, j, value, nullptr, it->abaixo); //nodes???????
-        //cout << it->linha << "->" << novo->linha << "->" << it->abaixo->linha << endl;
-        it->abaixo = novo;
+        
+        if(it->abaixo->linha == i) { // Se já existir um nó na posição i j, atualiza o valor e sai do insert
+            it->abaixo->valor = value;
+            return;
+        }
+        
+        Node *novo = new Node(i, j, value, nullptr, it->abaixo); 
+        it->abaixo = novo;  // cria e encadeia o novo nó
         
         //coloca o novo nó na linha correta
         aux = head->abaixo;
-        while(aux->linha != i)
+        while(aux->linha != i) // percorre as linhas até achar a correta
             aux = aux->abaixo;;
         it = aux;
-        while(it->direita->coluna != -1 && it->direita->coluna < j)
+        while(it->direita->coluna != -1 && it->direita->coluna < j) // percorre a linha até achar o local correto de inserção
             it = it->direita;
         novo->direita = it->direita;
-        //cout << it->coluna << "->" << novo->coluna << "->" << it->direita->coluna << endl;
-        it->direita = novo;
+        it->direita = novo; // encadeia o novo nó na linha
     }
     
     double Matriz::getValue(int i,int j) {
+        if(i > Ltam || i < 1 || j > Ctam || j < 1) {
+            cout << "Impossível obter valor de fora da matriz" << endl;
+            return 0;
+        }
         Node *aux = head->direita;
-        while(aux->coluna != j)
+        while(aux->coluna != j) // percorre até achar a coluna correta
             aux = aux->direita;
         Node *it = aux->abaixo;
-        while(it != aux || i == it->linha)
+        while(it != aux || i == it->linha) //percorre até achar a célula correta ou até o head da coluna se não existir
             it = it->abaixo;
         return it->valor;
     }
@@ -99,27 +106,15 @@ using namespace std;
     }
 
     void Matriz::print() {
-        /*Node *aux = head->abaixo; // olhar como foi inserido os nós
-        Node *it = aux->direita;
-        while(aux != head) {
-            while(it != aux) {
-                cout << "linha: " << it->linha << " coluna: " << it->coluna << " -> ";
-                it = it->direita;
-            }
-            cout << endl;
-            aux = aux->abaixo;
-            it = aux->direita;
-        }*/
-
         Node *aux = head;
         Node *it = aux;
-        for(int i = 1; i <= Ltam; i++) {
+        for(int i = 1; i <= Ltam; i++) { // percorre as linhas
             aux = aux->abaixo;
             it = aux;
-            for(int j = 1; j <= Ctam; j++) {
-                if(it->direita->linha == -1)
+            for(int j = 1; j <= Ctam; j++) { // percorre as colunas
+                if(it->direita->linha == -1) // Se não tiver ninguém à direita (voltando pro ínicio), imprime 0
                     cout << 0 << " ";
-                else if(it->direita->coluna == j) {
+                else if(it->direita->coluna == j) { // Se a coluna do nó estiver de acordo com o contador j, imprime o valor e vai pra frente
                     it = it->direita;
                     cout << it->valor << " ";
                 }
@@ -133,36 +128,33 @@ using namespace std;
     Matriz *soma (Matriz *A, Matriz *B) {
         int linhas = A->getTamLinhas();
         int colunas = A->getTamCols();
-        if(linhas != B->getTamLinhas() || colunas != B->getTamCols())
+        if(linhas != B->getTamLinhas() || colunas != B->getTamCols()) // Se não for possível somar, nullptr
             return nullptr;
-        
         Node *auxA = A->getHead();
         Node *itA = auxA->direita;
         Node *auxB = B->getHead();
         Node *itB = auxB->direita;
         Matriz *C = new Matriz(linhas, colunas);
         
-        for(int i = 1; i <= linhas; i++) {
+        for(int i = 1; i <= linhas; i++) { // percorre as linhas
             auxA = auxA->abaixo;
             itA = auxA->direita;
             auxB = auxB->abaixo;
             itB = auxB->direita;
-            while(itA->coluna != -1 || itB->coluna != -1) {
-                //cout << "A: " << itA->coluna << " B: " << itB->coluna << endl;
-                if(itA->coluna == itB->coluna) {
+            while(itA->coluna != -1 || itB->coluna != -1) { // percorre a linha de cada matriz enquanto as duas não acabarem
+                if(itA->coluna == itB->coluna) { // Se linha e coluna forem equivalentes, insere a soma na nova matriz e avança as 2 matrizes
                     C->insert(i, itA->coluna, itA->valor+itB->valor);
                     itA = itA->direita;
                     itB = itB->direita;
-                } else if (itA->coluna < itB->coluna && itA->coluna != -1 || itB->coluna == -1) {
+                } else if (itA->coluna < itB->coluna && itA->coluna != -1 || itB->coluna == -1) { // Se o nó de A tem valor da coluna menor q o nó de B, A+0 e avança A
                     C->insert(i, itA->coluna, itA->valor);
                     itA = itA->direita;
-                } else {
+                } else { // do contrário, B+0 e avança B
                     C->insert(i, itB->coluna, itB->valor);
                     itB = itB->direita;
                 }
             }
         }
-        //cout << "end";
         return C;
     }
     
@@ -172,7 +164,7 @@ using namespace std;
         int colunasA = A->getTamCols();
         int colunasB = B->getTamCols();
 
-        if(colunasA != linhasB)
+        if(colunasA != linhasB) // Se não for possivel multiplicar, nullptr
             return nullptr;
         
         Node *auxA = A->getHead();
@@ -181,54 +173,33 @@ using namespace std;
         Node *itB;
         Matriz *C = new Matriz(linhasA, colunasB);
         int valor = 0, valorA = 0, valorB = 0;
-        for(int i = 1; i <= linhasA; i++) {
+
+        for(int i = 1; i <= linhasA; i++) { // percorre as linhas da matriz A
             auxA = auxA->abaixo;
             auxB = B->getHead();
-            for(int j = 1; j <= colunasB; j++) {
+            for(int j = 1; j <= colunasB; j++) { // percorre as colunas da matriz B
                 auxB = auxB->direita;
                 itB = auxB;
                 itA = auxA;
                 valor = 0;
-                for(int k = 1; k <= colunasA; k++) {
+                for(int k = 1; k <= colunasA; k++) { // percorre as colunas de A e linhas de B
                     if(k != 1 && itA->linha == -1 && itB->coluna == -1)
                         break;
                     valorA = valorB = 0;
-                    if(itA->direita->coluna == k)
+                    if(itA->direita->coluna == k) // Se a coluna do nó de A à direita for igual ao contador k, vai pra direita
                         itA = itA->direita;
-                    if(itB->abaixo->linha == k)
+                    if(itB->abaixo->linha == k) // Se a linha do nó de B à baixo for igual ao contador k, vai pra baixo
                         itB = itB->abaixo;
-                    if(itA->coluna == k)
+                    if(itA->coluna == k) // Se a coluna do nó de A for igual ao contador k, guarda o valor da coluna de A
                         valorA = itA->valor;
-                    if(itB->linha == k)
+                    if(itB->linha == k) // Se a linha do nó for igual ao contador k, guarda o valor da linha de B
                         valorB = itB->valor;
-                    cout << valorA << " * " << valorB << " + ";
-                    valor += valorA*valorB;
+                    valor += valorA*valorB; // soma o valor de A * B com o resultado das multiplicações antes deles
                 }
-                //auxB = auxB->direita;
-                cout << " = " << valor << endl;
                 C->insert(i, j, valor);
             }
         }
         return C;
-        /*
-        Matriz *retorno = nullptr;
-	    if(this->_c != B->_l)
-		    return retorno;
-	    else {
-		    int valor;
-		    retorno = new Matriz(this->_l, B->_c);
-		    for(int i = 0; i < _l; i++)
-			    for(int j = 0; j < B->_c; j++)	{
-				    int valor = 0;
-				    for(int k = 0; k < _c; k++) {
-					    valor += this->_M[i][k]*B->_M[k][j];
-				    }
-				    retorno->_M[i][j] = valor;
-			    }
-		    return retorno;
-	    }
-        */
-        
     }
 
     Matriz *lerMatrizDeArquivo(std::string arq) {
