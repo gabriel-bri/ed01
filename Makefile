@@ -4,4 +4,3 @@ run:
 	./projeto
 clean:
 	rm ./projeto
-	rm Projeto.h.gch
